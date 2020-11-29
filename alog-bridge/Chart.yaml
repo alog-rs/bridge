@@ -1,0 +1,9 @@
+apiVersion: v2
+name: alog-bridge
+description: A Helm chart for the bridge service, an interface between JAGEX APIs and alog.rs
+
+type: application
+
+version: 0.1.0
+
+appVersion: 0.0.1
