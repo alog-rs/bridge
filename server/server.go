@@ -10,7 +10,8 @@ import (
 	"syscall"
 
 	"github.com/alog-rs/bridge/internal/helpers"
-	rs3pb "github.com/alog-rs/proto"
+	"github.com/alog-rs/bridge/service"
+	rs3pb "github.com/alog-rs/proto/rs3"
 	"github.com/alog-rs/shared-packages/pkg/utilities"
 
 	"github.com/spf13/cobra"
@@ -27,6 +28,10 @@ func handleSignals(errc chan<- error) {
 	err := fmt.Errorf("Encountered signal: %s", <-c)
 
 	errc <- err
+}
+
+func createRS3Service() *service.RS3Svc {
+	return service.NewRS3Svc(helpers.NewJAGEXRequest(helpers.DefaultClient(), nil))
 }
 
 func startGRPCServer(errc chan<- error) {
@@ -48,7 +53,7 @@ func startGRPCServer(errc chan<- error) {
 
 	s := grpc.NewServer()
 	grpc_health_v1.RegisterHealthServer(s, NewHealthServer())
-	rs3pb.RegisterRunescapeServer(s, NewRunescapeThreeServer())
+	rs3pb.RegisterRunescapeServer(s, NewRunescapeThreeServer(createRS3Service()))
 
 	if utilities.IsDev() {
 		reflection.Register(s)
