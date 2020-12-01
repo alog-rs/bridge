@@ -22,7 +22,7 @@ const (
 
 // IRS3Svc provides methods to fetch Runescape 3 data for the server
 type IRS3Svc interface {
-	GetPlayerProfile(name string, activityCount uint32) (*rs3pb.PlayerProfile, error)
+	GetPlayerProfile(name string, activityCount int) (*rs3pb.PlayerProfile, error)
 }
 
 // RS3Svc handles fetching Runescape 3 data for the server
@@ -43,7 +43,7 @@ func NewRS3Svc(req helpers.HTTPRequest) *RS3Svc {
 // 2) Highscores lite
 //
 // If one of the above fails we will attempt to use the next one. They are ordered by ease-of-use
-func (svc *RS3Svc) GetPlayerProfile(name string, activityCount uint32) (*rs3pb.PlayerProfile, error) {
+func (svc *RS3Svc) GetPlayerProfile(name string, activityCount int) (*rs3pb.PlayerProfile, error) {
 	rm, rmErr := svc.fetchProfileFromRuneMetrics(name, activityCount)
 
 	if rmErr != GetProfileErrorNone {
@@ -53,7 +53,7 @@ func (svc *RS3Svc) GetPlayerProfile(name string, activityCount uint32) (*rs3pb.P
 	return rm, nil
 }
 
-func (svc *RS3Svc) fetchProfileFromRuneMetrics(name string, activityCount uint32) (*rs3pb.PlayerProfile, GetProfileError) {
+func (svc *RS3Svc) fetchProfileFromRuneMetrics(name string, activityCount int) (*rs3pb.PlayerProfile, GetProfileError) {
 	var err error
 
 	res, err := svc.Req.Get(helpers.CreateRuneMetricsProfileEndpoint(name, activityCount))

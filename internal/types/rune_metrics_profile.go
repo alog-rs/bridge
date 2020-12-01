@@ -38,11 +38,11 @@ type RuneMetricsActivity struct {
 // RuneMetricsSkillValue represents a players statistics for a single skill
 type RuneMetricsSkillValue struct {
 	// Level is the users level in this skill
-	Level uint32 `json:"level"`
+	Level int `json:"level"`
 	// XP is the users xp in this skill
-	XP uint64 `json:"xp"`
+	XP int64 `json:"xp"`
 	// Rank is the users rank in this skill
-	Rank uint32 `json:"rank"`
+	Rank int `json:"rank"`
 	// ID is the ID for the skill
 	ID types.Skill `json:"id"`
 }
@@ -57,23 +57,23 @@ type RuneMetricsProfile struct {
 	// Rank is the users overall rank
 	Rank string `json:"rank"`
 	// TotalSkill is the users total level
-	TotalSkill uint32 `json:"totalskill"`
+	TotalSkill int `json:"totalskill"`
 	// TotalXP is the users total XP across all skills
-	TotalXP uint64 `json:"totalxp"`
+	TotalXP int64 `json:"totalxp"`
 	// CombatLevel is the users combat level
-	CombatLevel uint32 `json:"combatlevel"`
+	CombatLevel int `json:"combatlevel"`
 	// Melee is the users total XP in all melee skills
-	Melee uint64 `json:"melee"`
+	Melee int64 `json:"melee"`
 	// Ranged is the users total XP in the ranged skill
-	Ranged uint64 `json:"ranged"`
+	Ranged int64 `json:"ranged"`
 	// Magic is the users total XP in the magic skill
-	Magic uint64 `json:"magic"`
+	Magic int64 `json:"magic"`
 	// QuestsStarted are the number of quests the user has started but not completed
-	QuestsStarted uint32 `json:"questsstarted"`
+	QuestsStarted int `json:"questsstarted"`
 	// QuestsComplete is the number of quests the user has completed
-	QuestsComplete uint32 `json:"questscomplete"`
+	QuestsComplete int `json:"questscomplete"`
 	// QuestsNotStarted is the number of quests the user has yet to start
-	QuestsNotStarted uint32 `json:"questsnotstarted"`
+	QuestsNotStarted int `json:"questsnotstarted"`
 	// Activities is a list of the users recent activity
 	Activities []RuneMetricsActivity `json:"activities"`
 	// SkillValues is a list of the users skills
@@ -108,12 +108,13 @@ func skillsToPb(skills []RuneMetricsSkillValue) ([]*rs3pb.SkillData, error) {
 	for i, skill := range skills {
 		s := types.Skill(skill.ID)
 		// JAGEX why do you do stupid things like this?
-		xp := uint64(float64(skill.XP) * 0.1)
+		xp := int64(float64(skill.XP) * 0.1)
 
 		items[i] = &rs3pb.SkillData{
-			Rank:         skill.Rank,
-			Level:        skill.Level,
-			VirtualLevel: s.GetVirtualLevel(xp),
+			Skill:        rs3pb.Skill(s),
+			Rank:         int32(skill.Rank),
+			Level:        int32(skill.Level),
+			VirtualLevel: int32(s.GetVirtualLevel(xp)),
 			Xp:           xp,
 		}
 	}
@@ -154,7 +155,7 @@ func (p *RuneMetricsProfile) GetError() RuneMetricsProfileError {
 
 // ConvertToPB converts a RuneMetricsProfile into our protobuf PlayerProfile
 func (p *RuneMetricsProfile) ConvertToPB() (*rs3pb.PlayerProfile, error) {
-	rank, rankErr := strconv.ParseUint(strings.Replace(p.Rank, ",", "", -1), 10, 32)
+	rank, rankErr := strconv.ParseInt(strings.Replace(p.Rank, ",", "", -1), 10, 32)
 
 	if rankErr != nil {
 		return nil, errors.New("Failed to parse rank from RuneMetricsProfile")
@@ -172,16 +173,18 @@ func (p *RuneMetricsProfile) ConvertToPB() (*rs3pb.PlayerProfile, error) {
 		return nil, errors.New("Failed to parse skills from RuneMetricsProfile")
 	}
 
+	combat := int32(p.CombatLevel)
+
 	return &rs3pb.PlayerProfile{
 		Name:        p.Name,
-		Rank:        rank,
-		TotalLevel:  p.TotalSkill,
+		Rank:        int32(rank),
+		TotalLevel:  int32(p.TotalSkill),
 		TotalXp:     p.TotalXP,
-		CombatLevel: &p.CombatLevel,
+		CombatLevel: &combat,
 		QuestInfo: &rs3pb.QuestData{
-			Completed:  p.QuestsComplete,
-			Started:    p.QuestsStarted,
-			NotStarted: p.QuestsNotStarted,
+			Completed:  int32(p.QuestsComplete),
+			Started:    int32(p.QuestsStarted),
+			NotStarted: int32(p.QuestsNotStarted),
 		},
 		Activity: activities,
 		Skills:   skills,

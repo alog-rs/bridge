@@ -22,7 +22,7 @@ func NewRunescapeThreeServer(svc service.IRS3Svc) RunescapeThreeServer {
 
 // GetPlayerProfile returns a players profile from the backing service
 func (r RunescapeThreeServer) GetPlayerProfile(ctx context.Context, in *rs3pb.GetPlayerProfileRequest) (*rs3pb.PlayerProfile, error) {
-	profile, err := r.Svc.GetPlayerProfile(in.GetName(), in.GetActivityCount())
+	profile, err := r.Svc.GetPlayerProfile(in.GetName(), int(in.GetActivityCount()))
 
 	if err != nil {
 		return nil, err
