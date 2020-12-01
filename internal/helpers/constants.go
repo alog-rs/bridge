@@ -1,7 +1,16 @@
 package helpers
 
-const runemetricsURL string = "https://apps.runescape.com/runemetrics"
+import (
+	"fmt"
+	"strconv"
+)
 
-// RunemetricsProfileEndpoint provides a formatted string for use in calling the
-// Runemetrics profile endpoint
-const RunemetricsProfileEndpoint = runemetricsURL + "/profile/profile?user=%s&activities=%s"
+const runeMetricsURL string = "https://apps.runescape.com/runemetrics"
+const runeMetricsProfileEndpoint = runeMetricsURL + "/profile/profile?user=%s&activities=%s"
+
+// CreateRuneMetricsProfileEndpoint formats an endpoint with the given arguments
+func CreateRuneMetricsProfileEndpoint(user string, activityCount uint32) string {
+	count := strconv.FormatUint(uint64(activityCount), 10)
+
+	return fmt.Sprintf(runeMetricsProfileEndpoint, user, count)
+}

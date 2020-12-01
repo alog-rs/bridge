@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"errors"
 
 	"github.com/alog-rs/bridge/service"
 	rs3pb "github.com/alog-rs/proto/rs3"
@@ -26,7 +25,7 @@ func (r RunescapeThreeServer) GetPlayerProfile(ctx context.Context, in *rs3pb.Ge
 	profile, err := r.Svc.GetPlayerProfile(in.GetName(), in.GetActivityCount())
 
 	if err != nil {
-		return nil, errors.New("Failed to get player profile")
+		return nil, err
 	}
 
 	return profile, nil

@@ -18,18 +18,12 @@ type JAGEXRequest struct {
 }
 
 // NewJAGEXRequest creates a new JAGEXRequest
-func NewJAGEXRequest(client http.Client, headers http.Header) *JAGEXRequest {
+func NewJAGEXRequest() *JAGEXRequest {
 	return &JAGEXRequest{
-		Client:  client,
-		Headers: headers,
-	}
-}
-
-// DefaultClient returns a default client to use in requests
-func DefaultClient() http.Client {
-	return http.Client{
-		// TODO: Test this
-		Timeout: time.Second * 10,
+		Client: http.Client{
+			Timeout: time.Second * 10,
+		},
+		Headers: nil,
 	}
 }
 

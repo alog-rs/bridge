@@ -31,7 +31,7 @@ func handleSignals(errc chan<- error) {
 }
 
 func createRS3Service() *service.RS3Svc {
-	return service.NewRS3Svc(helpers.NewJAGEXRequest(helpers.DefaultClient(), nil))
+	return service.NewRS3Svc(helpers.NewJAGEXRequest())
 }
 
 func startGRPCServer(errc chan<- error) {
