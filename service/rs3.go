@@ -10,16 +10,6 @@ import (
 	rs3pb "github.com/alog-rs/proto/rs3"
 )
 
-type GetProfileError int
-
-const (
-	GetProfileErrorUnavailable GetProfileError = iota
-	GetProfileErrorNotFound
-	GetProfileErrorPrivate
-	GetProfileErrorUnknown
-	GetProfileErrorNone
-)
-
 // IRS3Svc provides methods to fetch Runescape 3 data for the server
 type IRS3Svc interface {
 	GetPlayerProfile(name string, activityCount int) (*rs3pb.PlayerProfile, error)
@@ -46,48 +36,40 @@ func NewRS3Svc(req helpers.HTTPRequest) *RS3Svc {
 func (svc *RS3Svc) GetPlayerProfile(name string, activityCount int) (*rs3pb.PlayerProfile, error) {
 	rm, rmErr := svc.fetchProfileFromRuneMetrics(name, activityCount)
 
-	if rmErr != GetProfileErrorNone {
+	if rmErr.IsPresent() {
 		return nil, errors.New("Failed to get player profile")
 	}
 
 	return rm, nil
 }
 
-func (svc *RS3Svc) fetchProfileFromRuneMetrics(name string, activityCount int) (*rs3pb.PlayerProfile, GetProfileError) {
+func (svc *RS3Svc) fetchProfileFromRuneMetrics(name string, activityCount int) (*rs3pb.PlayerProfile, types.Error) {
 	var err error
 
 	res, err := svc.Req.Get(helpers.CreateRuneMetricsProfileEndpoint(name, activityCount))
 
 	if err != nil {
-		return nil, GetProfileErrorUnavailable
+		return nil, types.ErrorRequestFailed
 	}
 
 	profile, err := types.NewRuneMetricsPlayerProfile(res)
 
 	if err != nil {
-		return nil, GetProfileErrorUnknown
+		return nil, types.ErrorInternal
 	}
 
 	profileError := profile.GetError()
 
-	if profileError == types.ProfileErrorNotFound {
-		return nil, GetProfileErrorNotFound
-	}
-
-	if profileError == types.ProfileErrorPrivate {
-		return nil, GetProfileErrorPrivate
-	}
-
-	if profileError == types.ProfileErrorUnknown {
-		return nil, GetProfileErrorUnknown
+	if profileError.IsPresent() {
+		return nil, profileError
 	}
 
 	pb, err := profile.ConvertToPB()
 
 	if err != nil {
 		fmt.Printf("Failed to convert to PB %v\n", err)
-		return nil, GetProfileErrorUnknown
+		return nil, types.ErrorInternal
 	}
 
-	return pb, GetProfileErrorNone
+	return pb, types.ErrorNone
 }

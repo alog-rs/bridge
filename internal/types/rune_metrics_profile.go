@@ -11,20 +11,6 @@ import (
 	"github.com/alog-rs/shared-packages/pkg/types"
 )
 
-// RuneMetricsPlayerProfileError represents an error returned form the PlayerProfile endpoint
-type RuneMetricsProfileError int
-
-const (
-	// ProfileErrorNotFound is returned when the user does not exist
-	ProfileErrorNotFound RuneMetricsProfileError = iota
-	// ProfileErrorPrivate is returned when the users profile is private
-	ProfileErrorPrivate
-	// ProfileErrorUnknown is returned when an unknown error is found
-	ProfileErrorUnknown
-	// ProfileErrorNone is returned when no error is returned
-	ProfileErrorNone
-)
-
 // RuneMetricsActivity represents a players recent activity
 type RuneMetricsActivity struct {
 	// Date is the date string from when the activity occured
@@ -123,16 +109,16 @@ func skillsToPb(skills []RuneMetricsSkillValue) ([]*rs3pb.SkillData, error) {
 }
 
 // ProfileErrorFromString parses a string into a RuneMetricsPlayerProfileError
-func ProfileErrorFromString(str string) RuneMetricsProfileError {
+func ProfileErrorFromString(str string) Error {
 	switch str {
 	case "NOT_FOUND":
-		return ProfileErrorNotFound
+		return ErrorResourceNotFound
 	case "PROFILE_PRIVATE":
-		return ProfileErrorPrivate
+		return ErrorResourceNotPublic
 	case "":
-		return ProfileErrorNone
+		return ErrorNone
 	default:
-		return ProfileErrorUnknown
+		return ErrorUnknown
 	}
 }
 
@@ -149,7 +135,7 @@ func NewRuneMetricsPlayerProfile(input []byte) (*RuneMetricsProfile, error) {
 }
 
 // GetError returns an error if it exists from a PlayerProfile
-func (p *RuneMetricsProfile) GetError() RuneMetricsProfileError {
+func (p *RuneMetricsProfile) GetError() Error {
 	return ProfileErrorFromString(p.Error)
 }
 
