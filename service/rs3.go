@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/alog-rs/bridge/internal/helpers"
 	"github.com/alog-rs/bridge/internal/types"
@@ -67,7 +66,6 @@ func (svc *RS3Svc) fetchProfileFromRuneMetrics(name string, activityCount int) (
 	pb, err := profile.ConvertToPB()
 
 	if err != nil {
-		fmt.Printf("Failed to convert to PB %v\n", err)
 		return nil, types.ErrorInternal
 	}
 
