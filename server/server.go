@@ -13,7 +13,6 @@ import (
 	"github.com/alog-rs/bridge/service"
 	rs3pb "github.com/alog-rs/proto/rs3"
 	"github.com/alog-rs/shared-packages/pkg/utilities"
-
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health/grpc_health_v1"

@@ -17,7 +17,7 @@ type Mock struct {
 	ctrl *gomock.Controller
 }
 
-func buildMock(t *testing.T) (*service.RS3Svc, *Mock) {
+func buildRS3Mock(t *testing.T) (*service.RS3Svc, *Mock) {
 	ctrl := gomock.NewController(t)
 	req := mocks.NewMockHTTPRequest(ctrl)
 
@@ -75,7 +75,7 @@ func TestGetPlayerProfile(t *testing.T) {
 		},
 	}
 
-	svc, mock := buildMock(t)
+	svc, mock := buildRS3Mock(t)
 	for _, tc := range cases {
 		mockUser := "mockuser"
 		mockActivityCount := 20

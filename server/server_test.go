@@ -17,10 +17,8 @@ import (
 
 const bufSize = 1024 * 1024
 
-var lis *bufconn.Listener
-
-func init() {
-	lis = bufconn.Listen(bufSize)
+func runHealthServer() (*bufconn.Listener, *grpc.Server) {
+	lis := bufconn.Listen(bufSize)
 	s := grpc.NewServer()
 
 	grpc_health_v1.RegisterHealthServer(s, server.NewHealthServer())
@@ -32,14 +30,14 @@ func init() {
 			log.Fatalf("Failed to start GRPC server %v", err)
 		}
 	}()
+
+	return lis, s
 }
 
-func bufDialer(context.Context, string) (net.Conn, error) {
-	return lis.Dial()
-}
-
-func createClient(ctx context.Context) (grpc_health_v1.HealthClient, error) {
-	conn, err := grpc.DialContext(ctx, "bufnet", grpc.WithContextDialer(bufDialer), grpc.WithInsecure())
+func createHealthClient(ctx context.Context, lis *bufconn.Listener) (grpc_health_v1.HealthClient, error) {
+	conn, err := grpc.DialContext(ctx, "bufnet", grpc.WithContextDialer(func(context.Context, string) (net.Conn, error) {
+		return lis.Dial()
+	}), grpc.WithInsecure())
 
 	if err != nil {
 		return nil, err
@@ -49,8 +47,11 @@ func createClient(ctx context.Context) (grpc_health_v1.HealthClient, error) {
 }
 
 func TestHealthServerCheck(t *testing.T) {
+	lis, s := runHealthServer()
 	ctx := context.Background()
-	client, clientErr := createClient(ctx)
+	client, clientErr := createHealthClient(ctx, lis)
+
+	defer s.Stop()
 
 	if clientErr != nil {
 		t.Fatalf("Failed to created client %v", clientErr)
@@ -70,8 +71,11 @@ func TestHealthServerCheck(t *testing.T) {
 }
 
 func TestHealthServerWatch(t *testing.T) {
+	lis, s := runHealthServer()
 	ctx := context.Background()
-	client, clientErr := createClient(ctx)
+	client, clientErr := createHealthClient(ctx, lis)
+
+	defer s.Stop()
 
 	if clientErr != nil {
 		t.Fatalf("Failed to create client %v", clientErr)

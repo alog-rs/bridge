@@ -5,7 +5,6 @@ import (
 
 	"github.com/alog-rs/bridge/internal/helpers"
 	"github.com/alog-rs/bridge/internal/types"
-
 	rs3pb "github.com/alog-rs/proto/rs3"
 )
 
