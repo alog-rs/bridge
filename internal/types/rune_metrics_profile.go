@@ -92,15 +92,14 @@ func skillsToPb(skills []RuneMetricsSkillValue) ([]*rs3pb.SkillData, error) {
 	items := make([]*rs3pb.SkillData, len(skills))
 
 	for i, skill := range skills {
-		s := types.Skill(skill.ID)
 		// JAGEX why do you do stupid things like this?
 		xp := int64(float64(skill.XP) * 0.1)
 
 		items[i] = &rs3pb.SkillData{
-			Skill:        rs3pb.Skill(s),
+			Skill:        rs3pb.Skill(skill.ID),
 			Rank:         int32(skill.Rank),
 			Level:        int32(skill.Level),
-			VirtualLevel: int32(s.GetVirtualLevel(xp)),
+			VirtualLevel: int32(skill.ID.GetVirtualLevel(xp)),
 			Xp:           xp,
 		}
 	}
@@ -108,8 +107,8 @@ func skillsToPb(skills []RuneMetricsSkillValue) ([]*rs3pb.SkillData, error) {
 	return items, nil
 }
 
-// ProfileErrorFromString parses a string into a RuneMetricsPlayerProfileError
-func ProfileErrorFromString(str string) Error {
+// ErrorFromString parses a string into a RuneMetricsPlayerProfileError
+func ErrorFromString(str string) Error {
 	switch str {
 	case "NOT_FOUND":
 		return ErrorResourceNotFound
@@ -136,7 +135,7 @@ func NewRuneMetricsPlayerProfile(input []byte) (*RuneMetricsProfile, error) {
 
 // GetError returns an error if it exists from a PlayerProfile
 func (p *RuneMetricsProfile) GetError() Error {
-	return ProfileErrorFromString(p.Error)
+	return ErrorFromString(p.Error)
 }
 
 // ConvertToPB converts a RuneMetricsProfile into our protobuf PlayerProfile
@@ -159,14 +158,14 @@ func (p *RuneMetricsProfile) ConvertToPB() (*rs3pb.PlayerProfile, error) {
 		return nil, errors.New("Failed to parse skills from RuneMetricsProfile")
 	}
 
-	combat := int32(p.CombatLevel)
+	combatlevel := int32(p.CombatLevel)
 
 	return &rs3pb.PlayerProfile{
 		Name:        p.Name,
 		Rank:        int32(rank),
 		TotalLevel:  int32(p.TotalSkill),
 		TotalXp:     p.TotalXP,
-		CombatLevel: &combat,
+		CombatLevel: &combatlevel,
 		QuestInfo: &rs3pb.QuestData{
 			Completed:  int32(p.QuestsComplete),
 			Started:    int32(p.QuestsStarted),

@@ -1,6 +1,8 @@
 package helpers
 
 import (
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -8,45 +10,45 @@ import (
 
 // HTTPRequest interface implements methods which make requests to external endpoints
 type HTTPRequest interface {
-	Get(string) ([]byte, error)
+	GetRuneMetricsProfile(string, int) ([]byte, error)
 }
 
-// JAGEXRequest holds information used to make requests to JAGEX endpoints
-type JAGEXRequest struct {
-	Client  http.Client
-	Headers http.Header
-}
+// JAGEXRequest allows for making requests to JAGEX endpoints
+type JAGEXRequest struct{}
 
 // NewJAGEXRequest creates a new JAGEXRequest
 func NewJAGEXRequest() *JAGEXRequest {
-	return &JAGEXRequest{
-		Client: http.Client{
-			Timeout: time.Second * 10,
-		},
-		Headers: nil,
-	}
+	return &JAGEXRequest{}
 }
 
-// Get make a new GET request to the provided endpoint
-func (r *JAGEXRequest) Get(endpoint string) ([]byte, error) {
-	var err error = nil
+// GetRuneMetricsProfile is responsible for calling the /profile endpoint from RuneMetrics
+func (r *JAGEXRequest) GetRuneMetricsProfile(name string, activityCount int) ([]byte, error) {
+	endpoint := CreateRuneMetricsProfileEndpoint(name, activityCount)
 	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header = r.Headers
+	client := http.Client{
+		Timeout: time.Second * 10,
+	}
 
-	res, err := r.Client.Do(req)
+	res, err := client.Do(req)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if res.Body != nil {
-		defer res.Body.Close()
+	if res.StatusCode != 200 {
+		return nil, fmt.Errorf("Failed to call GetProfile: Receieved %d status code", res.StatusCode)
 	}
+
+	if res.Body == nil {
+		return nil, errors.New("Failed to call GetProfile: Received nil body")
+	}
+
+	defer res.Body.Close()
 
 	return ioutil.ReadAll(res.Body)
 }

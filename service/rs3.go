@@ -46,7 +46,7 @@ func (svc *RS3Svc) GetPlayerProfile(name string, activityCount int) (*rs3pb.Play
 func (svc *RS3Svc) fetchProfileFromRuneMetrics(name string, activityCount int) (*rs3pb.PlayerProfile, types.Error) {
 	var err error
 
-	res, err := svc.Req.Get(helpers.CreateRuneMetricsProfileEndpoint(name, activityCount))
+	res, err := svc.Req.GetRuneMetricsProfile(name, activityCount)
 
 	if err != nil {
 		return nil, types.ErrorRequestFailed
