@@ -22,8 +22,8 @@ func NewJAGEXRequest() *JAGEXRequest {
 }
 
 // GetRuneMetricsProfile is responsible for calling the /profile endpoint from RuneMetrics
-func (r *JAGEXRequest) GetRuneMetricsProfile(name string, activityCount int) ([]byte, error) {
-	endpoint := CreateRuneMetricsProfileEndpoint(name, activityCount)
+func (r *JAGEXRequest) GetRuneMetricsProfile(user string, activityCount int) ([]byte, error) {
+	endpoint := CreateRuneMetricsProfileEndpoint(user, activityCount)
 	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 
 	if err != nil {

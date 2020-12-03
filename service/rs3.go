@@ -32,8 +32,8 @@ func NewRS3Svc(req helpers.HTTPRequest) *RS3Svc {
 // 2) Highscores lite
 //
 // If one of the above fails we will attempt to use the next one. They are ordered by ease-of-use
-func (svc *RS3Svc) GetPlayerProfile(name string, activityCount int) (*rs3pb.PlayerProfile, error) {
-	rm, rmErr := svc.fetchProfileFromRuneMetrics(name, activityCount)
+func (svc *RS3Svc) GetPlayerProfile(user string, activityCount int) (*rs3pb.PlayerProfile, error) {
+	rm, rmErr := svc.fetchProfileFromRuneMetrics(user, activityCount)
 
 	if rmErr.IsPresent() {
 		return nil, errors.New("Failed to get player profile")
@@ -42,10 +42,10 @@ func (svc *RS3Svc) GetPlayerProfile(name string, activityCount int) (*rs3pb.Play
 	return rm, nil
 }
 
-func (svc *RS3Svc) fetchProfileFromRuneMetrics(name string, activityCount int) (*rs3pb.PlayerProfile, types.Error) {
+func (svc *RS3Svc) fetchProfileFromRuneMetrics(user string, activityCount int) (*rs3pb.PlayerProfile, types.Error) {
 	var err error
 
-	res, err := svc.Req.GetRuneMetricsProfile(name, activityCount)
+	res, err := svc.Req.GetRuneMetricsProfile(user, activityCount)
 
 	if err != nil {
 		return nil, types.ErrorRequestFailed
