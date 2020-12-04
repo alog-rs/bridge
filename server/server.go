@@ -58,11 +58,9 @@ func startGRPCServer(errc chan<- error) {
 		reflection.Register(s)
 	}
 
-	server := NewGRPCServer(lis, s)
-
 	log.Printf("Serving GRPC server from port %s\n", gRPCPort)
 
-	errc <- server.Serve()
+	errc <- s.Serve(lis)
 }
 
 func gracefulShutdown(err error) {
