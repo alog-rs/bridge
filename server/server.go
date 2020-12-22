@@ -10,9 +10,9 @@ import (
 	"syscall"
 
 	"github.com/alog-rs/bridge/internal/helpers"
-	rs3pb "github.com/alog-rs/proto"
+	"github.com/alog-rs/bridge/service"
+	rs3pb "github.com/alog-rs/proto/rs3"
 	"github.com/alog-rs/shared-packages/pkg/utilities"
-
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health/grpc_health_v1"
@@ -27,6 +27,10 @@ func handleSignals(errc chan<- error) {
 	err := fmt.Errorf("Encountered signal: %s", <-c)
 
 	errc <- err
+}
+
+func createRS3Service() *service.RS3Svc {
+	return service.NewRS3Svc(helpers.NewJAGEXRequest())
 }
 
 func startGRPCServer(errc chan<- error) {
@@ -48,17 +52,15 @@ func startGRPCServer(errc chan<- error) {
 
 	s := grpc.NewServer()
 	grpc_health_v1.RegisterHealthServer(s, NewHealthServer())
-	rs3pb.RegisterRunescapeServer(s, NewRunescapeThreeServer())
+	rs3pb.RegisterRunescapeServer(s, NewRunescapeThreeServer(createRS3Service()))
 
 	if utilities.IsDev() {
 		reflection.Register(s)
 	}
 
-	server := NewGRPCServer(lis, s)
-
 	log.Printf("Serving GRPC server from port %s\n", gRPCPort)
 
-	errc <- server.Serve()
+	errc <- s.Serve(lis)
 }
 
 func gracefulShutdown(err error) {

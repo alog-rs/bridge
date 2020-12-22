@@ -10,8 +10,8 @@ build:
 deploy:
   helm:
     releases:
-      - name: bridge-dev
-        chartPath: src/bridge/alog-bridge
+      - name: alog-bridge-dev
+        chartPath: alog-bridge
         valuesFiles:
           - "./alog-bridge/values.yaml"
           - "./alog-bridge/values.development.yaml"
@@ -19,7 +19,7 @@ deploy:
           image: registry.digitalocean.com/alog-rs/bridge
 
 profiles:
-  - name: bridge-prod
+  - name: alog-bridge-prod
     activation:
       - env: PRODUCTION_ENV=1
     patches:
